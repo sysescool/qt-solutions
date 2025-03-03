@@ -9,6 +9,9 @@
 #include <QStringList>
 #include <QDir>
 #include <QSettings>
+#if QT_VERSION > 0x050000
+#include <QRegularExpression>
+#endif
 
 #include "qtservice.h"
 
@@ -61,7 +64,12 @@ private slots:
         // document back.
         QTcpSocket* socket = (QTcpSocket*)sender();
         if (socket->canReadLine()) {
+#if QT_VERSION > 0x050000
+            QRegularExpression pattern(".*\\.txt$");
+            QStringList tokens = QString(socket->readLine()).split(pattern);
+#else
             QStringList tokens = QString(socket->readLine()).split(QRegExp("[ \r\n][ \r\n]*"));
+#endif
             if (tokens[0] == "GET") {
                 QTextStream os(socket);
                 os.setAutoDetectUnicode(true);

@@ -2,7 +2,13 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 #include <QApplication>
+#if QT_VERSION < 0x060000
 #include <QDesktopWidget>
+#else
+#include <QGuiApplication> // 新增头文件
+#include <QOperatingSystemVersion>
+#include <QScreen> // 新增头文件
+#endif
 #include <QLabel>
 #include <QDir>
 #include <QSettings>
@@ -39,6 +45,13 @@ InteractiveService::~InteractiveService()
 
 void InteractiveService::start()
 {
+#if QT_VERSION > 0x050000
+#if defined(Q_OS_WIN)
+    QOperatingSystemVersion osVer = QOperatingSystemVersion::current();
+    const bool isVistaPlus = (osVer.type() == QOperatingSystemVersion::Windows)
+                             && (osVer.majorVersion() >= 6);
+#endif
+#else
 #if defined(Q_OS_WIN)
     if ((QSysInfo::WindowsVersion & QSysInfo::WV_NT_based) &&
         (QSysInfo::WindowsVersion >= QSysInfo::WV_VISTA)) {
@@ -46,11 +59,17 @@ void InteractiveService::start()
         return;
     }
 #endif
-
+#endif
     qApp->setQuitOnLastWindowClosed(false);
 
     gui = new QLabel("Service", 0, Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
+#if QT_VERSION > 0x050000
+    QScreen *primaryScreen = QGuiApplication::primaryScreen();
+    QRect availableGeometry = primaryScreen->availableGeometry();
+    gui->move(availableGeometry.topLeft());
+#else
     gui->move(QApplication::desktop()->availableGeometry().topLeft());
+#endif
     gui->show();
 }
 
