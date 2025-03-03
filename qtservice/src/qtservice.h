@@ -5,6 +5,9 @@
 #define QTSERVICE_H
 
 #include <QCoreApplication>
+#if QT_VERSION >= 0x060000
+#include <QStringList>
+#endif
 
 #if defined(Q_OS_WIN)
 #  if !defined(QT_QTSERVICE_EXPORT) && !defined(QT_QTSERVICE_IMPORT)
@@ -22,7 +25,9 @@
 #  define QT_QTSERVICE_EXPORT
 #endif
 
+#if QT_VERSION < 0x060000
 class QStringList;
+#endif
 class QtServiceControllerPrivate;
 
 class QT_QTSERVICE_EXPORT QtServiceController
