@@ -50,6 +50,12 @@ void InteractiveService::start()
     QOperatingSystemVersion osVer = QOperatingSystemVersion::current();
     const bool isVistaPlus = (osVer.type() == QOperatingSystemVersion::Windows)
                              && (osVer.majorVersion() >= 6);
+    if (isVistaPlus) {
+        logMessage("Service GUI not allowed on Windows Vista. See the documentation for this "
+                   "example for more information.",
+                   QtServiceBase::Error);
+        return;
+    }
 #endif
 #else
 #if defined(Q_OS_WIN)
@@ -98,6 +104,30 @@ void InteractiveService::processCommand(int code)
 
 int main(int argc, char **argv)
 {
+#if QT_VERSION > 0x050000
+#if defined(Q_OS_WIN)
+    QOperatingSystemVersion osVer = QOperatingSystemVersion::current();
+    const bool isVistaPlus = (osVer.type() == QOperatingSystemVersion::Windows)
+                             && (osVer.majorVersion() >= 6);
+    if (isVistaPlus) {
+        // logMessage("Service GUI not allowed on Windows Vista. See the documentation for this "
+        //            "example for more information.",
+        //            QtServiceBase::Error);
+        // return 1;
+    }
+#endif
+#else
+#if defined(Q_OS_WIN)
+    if ((QSysInfo::WindowsVersion & QSysInfo::WV_NT_based)
+        && (QSysInfo::WindowsVersion >= QSysInfo::WV_VISTA)) {
+        logMessage("Service GUI not allowed on Windows Vista. See the documentation for this "
+                   "example for more information.",
+                   QtServiceBase::Error);
+        return 1;
+    }
+#endif
+#endif
+
 #if !defined(Q_OS_WIN)
     // QtService stores service settings in SystemScope, which normally require root privileges.
     // To allow testing this example as non-root, we change the directory of the SystemScope settings file.

@@ -65,7 +65,7 @@ private slots:
         QTcpSocket* socket = (QTcpSocket*)sender();
         if (socket->canReadLine()) {
 #if QT_VERSION > 0x050000
-            QRegularExpression pattern(".*\\.txt$");
+            QRegularExpression pattern("[ \r\n][ \r\n]*");
             QStringList tokens = QString(socket->readLine()).split(pattern);
 #else
             QStringList tokens = QString(socket->readLine()).split(QRegExp("[ \r\n][ \r\n]*"));
@@ -117,12 +117,11 @@ protected:
         QCoreApplication *app = application();
 
 #if QT_VERSION < 0x040100
-        quint16 port = (app->argc() > 1) ?
-                QString::fromLocal8Bit(app->argv()[1]).toUShort() : 8080;
+        quint16 port = (app->argc() > 1) ? QString::fromLocal8Bit(app->argv()[1]).toUShort()
+                                         : 17799;
 #else
         const QStringList arguments = QCoreApplication::arguments();
-        quint16 port = (arguments.size() > 1) ?
-                arguments.at(1).toUShort() : 8080;
+        quint16 port = (arguments.size() > 1) ? arguments.at(1).toUShort() : 17799;
 #endif
         daemon = new HttpDaemon(port, app);
 
